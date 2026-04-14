@@ -31,5 +31,6 @@ urlpatterns = [
     path('my/messages/',                       messaging_views.thread_list,   name='thread_list'),
     path('my/messages/<int:thread_id>/',       messaging_views.thread_detail, name='thread_detail'),
     path('my/messages/<int:thread_id>/send/',  messaging_views.customer_send, name='customer_send'),
+    path('my/messages/start/',                 messaging_views.start_thread,  name='start_thread'),
     path('reply/<str:token>/',                 messaging_views.farm_reply,    name='farm_reply'),
 ]

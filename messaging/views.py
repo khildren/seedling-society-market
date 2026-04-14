@@ -13,6 +13,8 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from customers.views import _require_customer
+from farms.models import Farm
+from reservations.models import Order
 from .models import MessageThread, Message, FarmReplyToken
 
 logger = logging.getLogger(__name__)
@@ -81,10 +83,68 @@ def customer_send(request, thread_id):
         body=body,
     )
 
-    # TODO: send SMS notification to farm (Phase 2 — Twilio)
+    # Create a fresh reply token and SMS it to the farm
+    reply_token = FarmReplyToken.objects.create(thread=thread)
+    from .sms import send_farm_reply_request
+    send_farm_reply_request(request, thread, reply_token)
     logger.info('Customer %s sent message on thread %s', customer.pk, thread.pk)
 
     return redirect('thread_detail', thread_id=thread_id)
+
+
+# ---------------------------------------------------------------------------
+# Customer: start a new thread (from order detail)
+# ---------------------------------------------------------------------------
+
+@require_POST
+def start_thread(request):
+    """
+    Create a new MessageThread (or reuse existing) for a farm + order,
+    save the opening message, and redirect to the thread detail.
+    """
+    customer = _require_customer(request)
+    if not customer:
+        return redirect('lookup')
+
+    farm_id  = request.POST.get('farm_id', '')
+    order_id = request.POST.get('order_id', '')
+    body     = request.POST.get('body', '').strip()
+
+    if not body:
+        messages.error(request, 'Message cannot be empty.')
+        from django.http import HttpResponseBadRequest
+        return HttpResponseBadRequest()
+
+    try:
+        farm = Farm.objects.get(pk=farm_id, is_active=True)
+    except Farm.DoesNotExist:
+        messages.error(request, 'Farm not found.')
+        return redirect('dashboard')
+
+    order = None
+    if order_id:
+        try:
+            order = Order.objects.get(pk=order_id, customer=customer)
+        except Order.DoesNotExist:
+            pass
+
+    # Reuse existing open thread for this order+farm if one exists
+    thread = (
+        MessageThread.objects
+        .filter(customer=customer, farm=farm, order=order)
+        .first()
+    )
+    if not thread:
+        thread = MessageThread.objects.create(customer=customer, farm=farm, order=order)
+
+    Message.objects.create(thread=thread, sender_type=Message.SENDER_CUSTOMER, body=body)
+
+    # Notify farm via SMS
+    reply_token = FarmReplyToken.objects.create(thread=thread)
+    from .sms import send_farm_reply_request
+    send_farm_reply_request(request, thread, reply_token)
+
+    return redirect('thread_detail', thread_id=thread.pk)
 
 
 # ---------------------------------------------------------------------------
@@ -124,7 +184,8 @@ def farm_reply(request, token):
         reply_token.used_at = timezone.now()
         reply_token.save(update_fields=['used_at'])
 
-        # TODO: send SMS to customer notifying of farm reply (Phase 2 — Twilio)
+        from .sms import send_customer_reply_notification
+        send_customer_reply_notification(request, thread)
         logger.info('Farm replied on thread %s via token', thread.pk)
 
         return render(request, 'messaging/farm_reply_sent.html', {'thread': thread})

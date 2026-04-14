@@ -65,6 +65,11 @@ def lookup(request):
         )
         request.session['customer_id'] = customer.pk
         logger.info('Customer %s %s via lookup', customer.pk, 'created' if created else 'logged in')
+
+        # Send magic link SMS so customer can return without re-entering phone
+        from messaging.sms import send_magic_link
+        send_magic_link(request, customer)
+
         return redirect('dashboard')
 
     # If already authed, go straight to dashboard

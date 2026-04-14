@@ -203,6 +203,10 @@ def place_order(request):
 
     fulfill_order(order)
 
+    # Notify customer of outcome via SMS
+    from messaging.sms import send_order_confirmation
+    send_order_confirmation(request, order)
+
     request.session.pop('cart', None)
     request.session.modified = True
 
@@ -218,7 +222,15 @@ def order_detail(request, order_token):
     order = get_object_or_404(Order, order_token=order_token)
     items = order.items.select_related('listing__product', 'listing__farm', 'fulfillment_farm')
 
+    # Distinct farms that actually fulfilled items (for message forms)
+    farms_fulfilled = list({
+        item.fulfillment_farm
+        for item in items
+        if item.fulfillment_farm_id and item.quantity_fulfilled > 0
+    })
+
     return render(request, 'reservations/order_detail.html', {
-        'order': order,
-        'items': items,
+        'order':           order,
+        'items':           items,
+        'farms_fulfilled': farms_fulfilled,
     })

@@ -49,10 +49,30 @@
   </div>
 {% endif %}
 
-<div class="flex gap-1 mt-3">
+{% if order.status != "cancelled" and farms_fulfilled %}
+  <div class="mt-3">
+    <h2>Message a farm</h2>
+    <p class="text-muted" style="margin-bottom:.75rem; font-size:.9rem;">
+      Have a question about your order? Send a message — the farm will get an SMS with a reply link.
+    </p>
+    {% for farm in farms_fulfilled %}
+      <div class="card" style="margin-bottom:.75rem;">
+        <strong>{{ farm.name }}</strong>
+        <form method="post" action="{% url 'start_thread' %}" style="margin-top:.6rem; display:flex; gap:.5rem; align-items:flex-start; flex-wrap:wrap;">
+          {% csrf_token %}
+          <input type="hidden" name="farm_id"  value="{{ farm.pk }}">
+          <input type="hidden" name="order_id" value="{{ order.pk }}">
+          <textarea name="body" rows="2" placeholder="Type your message to {{ farm.name }}…"
+                    style="flex:1; min-width:200px;" required></textarea>
+          <button type="submit" class="btn btn-primary btn-sm">Send</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="flex gap-1 mt-2">
   <a href="{% url 'dashboard' %}" class="btn btn-secondary">My orders</a>
-  {% if order.status != "cancelled" %}
-    <a href="{% url 'thread_list' %}" class="btn btn-secondary">Message a farm</a>
-  {% endif %}
+  <a href="{% url 'thread_list' %}" class="btn btn-secondary">All messages</a>
 </div>
 {% endblock %}
