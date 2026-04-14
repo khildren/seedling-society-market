@@ -51,7 +51,7 @@ ROOT_URLCONF = 'market.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,4 +111,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL  = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Sessions last 30 days; customer stays logged in across visits
+SESSION_COOKIE_AGE    = 60 * 60 * 24 * 30
+SESSION_COOKIE_SECURE = not DEBUG
+
+# Use cookie-based message storage so messages survive redirects
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

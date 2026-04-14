@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Messages — Seedling Society{% endblock %}
+
+{% block content %}
+<h1>Messages</h1>
+
+{% if threads %}
+  {% for thread in threads %}
+    <a href="{% url 'thread_detail' thread_id=thread.pk %}" style="text-decoration:none; color:inherit; display:block;">
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem;">
+        <div>
+          <strong>{{ thread.farm.name }}</strong>
+          {% if thread.order %}
+            <span class="text-muted">— Order #{{ thread.order.pk }}</span>
+          {% endif %}
+          <div class="text-muted" style="font-size:.85rem; margin-top:.2rem;">
+            {% with last=thread.messages.last %}
+              {% if last %}{{ last.body|truncatechars:60 }}{% else %}No messages yet{% endif %}
+            {% endwith %}
+          </div>
+        </div>
+        <div class="text-muted" style="font-size:.82rem;">
+          {% with last=thread.messages.last %}
+            {% if last %}{{ last.sent_at|date:"M j" }}{% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </a>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">No messages yet.</p>
+{% endif %}
+{% endblock %}

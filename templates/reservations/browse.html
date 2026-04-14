@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Market Dates — Seedling Society{% endblock %}
+
+{% block content %}
+<h1>Upcoming Markets</h1>
+
+{% if market_dates %}
+  <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-top:1rem;">
+    {% for d in market_dates %}
+      <a href="{% url 'market_day' market_date=d %}" class="card" style="text-decoration:none; color:inherit; display:block; text-align:center; padding:1.5rem 1rem;">
+        <div style="font-size:1.4rem; font-weight:700; color:var(--green);">{{ d|date:"D, M j" }}</div>
+        <div class="text-muted" style="margin-top:.25rem;">{{ d|date:"Y" }}</div>
+        <div class="btn btn-primary btn-sm" style="margin-top:.75rem;">View menu</div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-muted">No upcoming market dates available yet. Check back soon.</p>
+{% endif %}
+{% endblock %}

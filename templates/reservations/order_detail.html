@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.pk }} — Seedling Society{% endblock %}
+
+{% block content %}
+<div class="flex" style="justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem;">
+  <div>
+    <h1>Order #{{ order.pk }}</h1>
+    <p class="text-muted">{{ order.market_date|date:"l, F j, Y" }}</p>
+  </div>
+  <span class="badge badge-{{ order.status }}" style="font-size:.9rem; padding:.4rem .9rem;">{{ order.get_status_display }}</span>
+</div>
+
+{% if order.status == "partial" %}
+  <div class="card" style="border-color:var(--amber); background:#fff8e8; margin-bottom:1rem;">
+    Some items couldn't be fully filled from your preferred farms. See details below.
+  </div>
+{% elif order.status == "cancelled" %}
+  <div class="card" style="border-color:var(--red); background:#fdf0f0; margin-bottom:1rem;">
+    This order was cancelled — none of the requested items were available.
+  </div>
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Requested</th>
+      <th>Fulfilled</th>
+      <th>Fulfilled by</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+      <tr>
+        <td>{{ item.listing.product.name }}</td>
+        <td>{{ item.quantity_requested }}</td>
+        <td>{{ item.quantity_fulfilled }}</td>
+        <td>{{ item.fulfillment_farm.name|default:"—" }}</td>
+        <td><span class="badge badge-{{ item.status }}">{{ item.get_status_display }}</span></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if order.notes %}
+  <div class="card mt-2">
+    <strong>Order notes:</strong> {{ order.notes }}
+  </div>
+{% endif %}
+
+<div class="flex gap-1 mt-3">
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">My orders</a>
+  {% if order.status != "cancelled" %}
+    <a href="{% url 'thread_list' %}" class="btn btn-secondary">Message a farm</a>
+  {% endif %}
+</div>
+{% endblock %}

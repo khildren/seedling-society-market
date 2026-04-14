@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Farm Preferences — Seedling Society{% endblock %}
+
+{% block content %}
+<h1>Farm Preferences</h1>
+<p class="text-muted" style="margin-bottom:1.25rem;">
+  Choose up to 3 farms in order. We try your primary farm first, then fall back to secondary, then tertiary.
+</p>
+
+<div class="card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Primary farm</label>
+      <select name="farm_1">
+        <option value="0">— None —</option>
+        {% for farm in farms %}
+          <option value="{{ farm.pk }}" {% if sel_1 == farm.pk %}selected{% endif %}>{{ farm.name }} — {{ farm.location }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Secondary farm</label>
+      <select name="farm_2">
+        <option value="0">— None —</option>
+        {% for farm in farms %}
+          <option value="{{ farm.pk }}" {% if sel_2 == farm.pk %}selected{% endif %}>{{ farm.name }} — {{ farm.location }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tertiary farm</label>
+      <select name="farm_3">
+        <option value="0">— None —</option>
+        {% for farm in farms %}
+          <option value="{{ farm.pk }}" {% if sel_3 == farm.pk %}selected{% endif %}>{{ farm.name }} — {{ farm.location }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="flex gap-1">
+      <button type="submit" class="btn btn-primary">Save preferences</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

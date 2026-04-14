@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Sign in — Seedling Society{% endblock %}
+
+{% block content %}
+<div style="max-width:400px; margin:3rem auto;">
+  <h1>Seedling Society</h1>
+  <p class="text-muted" style="margin-bottom:1.5rem;">
+    A community farmers market. Enter your phone number to get started — no password needed.
+  </p>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" name="phone" placeholder="(555) 867-5309" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="first_name">First name <span class="text-muted">(optional)</span></label>
+        <input type="text" id="first_name" name="first_name" placeholder="Your first name">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Continue</button>
+    </form>
+  </div>
+
+  <p class="text-muted" style="text-align:center; font-size:.82rem; margin-top:1rem;">
+    New here? We'll create your account automatically.
+  </p>
+</div>
+{% endblock %}

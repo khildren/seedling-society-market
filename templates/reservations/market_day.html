@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Market — {{ market_date }} — Seedling Society{% endblock %}
+
+{% block content %}
+<div class="flex" style="justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem;">
+  <h1>{{ market_date|date:"l, F j, Y" }}</h1>
+  <a href="{% url 'cart' %}" class="btn btn-primary">
+    View cart
+    {% with total=cart|length %}{% if total %} ({{ total }}){% endif %}{% endwith %}
+  </a>
+</div>
+
+{% if grouped %}
+  {% for category, listings in grouped.items %}
+    <h2 style="margin-top:1.5rem; padding-bottom:.4rem; border-bottom:2px solid var(--green-l);">{{ category }}</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-top:.75rem;">
+      {% for listing in listings %}
+        <div class="card" style="display:flex; flex-direction:column; gap:.5rem;">
+          {% if listing.product.image_url %}
+            <img src="{{ listing.product.image_url }}" alt="{{ listing.product.name }}"
+                 style="width:100%; height:140px; object-fit:cover; border-radius:4px;">
+          {% endif %}
+          <div style="font-weight:600;">{{ listing.product.name }}</div>
+          <div class="text-muted" style="font-size:.85rem;">{{ listing.farm.name }}</div>
+          {% if listing.product.description %}
+            <div class="text-muted" style="font-size:.85rem;">{{ listing.product.description|truncatechars:80 }}</div>
+          {% endif %}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+            <div>
+              <strong>${{ listing.price }}</strong>
+              <span class="text-muted">/ {{ listing.unit_label }}</span>
+            </div>
+            <div class="text-muted" style="font-size:.82rem;">{{ listing.quantity_available }} avail.</div>
+          </div>
+
+          <form method="post" action="{% url 'cart_add' market_date=market_date %}" style="display:flex; gap:.4rem;">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id" value="{{ listing.pk }}">
+            <input type="number" name="quantity" value="1"
+                   min="0" max="{{ listing.quantity_available }}"
+                   style="width:60px; padding:.4rem .5rem;">
+            <button type="submit" class="btn btn-primary btn-sm" style="flex:1;">Add to cart</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">No items available for this date.</p>
+{% endif %}
+{% endblock %}

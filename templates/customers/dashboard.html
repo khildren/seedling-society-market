@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}My Orders — Seedling Society{% endblock %}
+
+{% block content %}
+<div class="flex" style="justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:.5rem; margin-bottom:1.25rem;">
+  <h1>Hello, {{ customer.first_name|default:customer.phone }}</h1>
+  <a href="{% url 'browse' %}" class="btn btn-primary">Shop upcoming markets</a>
+</div>
+
+{% if prefs %}
+  <p class="text-muted" style="margin-bottom:1.25rem;">
+    Your farm preferences:
+    {% for p in prefs %}
+      <strong>{{ p.farm.name }}</strong>{% if not forloop.last %} → {% endif %}
+    {% endfor %}
+    &nbsp;<a href="{% url 'preferences' %}" class="btn btn-secondary btn-sm">Edit</a>
+  </p>
+{% else %}
+  <div class="card" style="border-color:#c8860a; background:#fff8e8;">
+    <strong>Set your farm preferences</strong> — pick up to 3 farms you'd like us to source from first.
+    <a href="{% url 'preferences' %}" class="btn btn-secondary btn-sm" style="margin-left:.75rem;">Set preferences</a>
+  </div>
+{% endif %}
+
+<h2>Recent orders</h2>
+
+{% if orders %}
+  {% for order in orders %}
+    <div class="card">
+      <div class="flex" style="justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
+        <div>
+          <strong>{{ order.market_date }}</strong>
+          <span class="badge badge-{{ order.status }}" style="margin-left:.5rem;">{{ order.get_status_display }}</span>
+        </div>
+        <a href="{% url 'order_detail' order_token=order.order_token %}" class="btn btn-secondary btn-sm">View order</a>
+      </div>
+      <div class="text-muted mt-1">
+        {% for item in order.items.all %}
+          {{ item.quantity_requested }}x {{ item.listing.product.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">No orders yet. <a href="{% url 'browse' %}">Browse the market</a> to place your first order.</p>
+{% endif %}
+{% endblock %}

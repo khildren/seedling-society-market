@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Cart — Seedling Society{% endblock %}
+
+{% block content %}
+<h1>Your Cart</h1>
+
+{% if items %}
+  <table style="margin-bottom:1.25rem;">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Farm</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in items %}
+        <tr>
+          <td>{{ entry.listing.product.name }}</td>
+          <td class="text-muted">{{ entry.listing.farm.name }}</td>
+          <td>${{ entry.listing.price }}/{{ entry.listing.unit_label }}</td>
+          <td>{{ entry.quantity }}</td>
+          <td>${{ entry.subtotal }}</td>
+          <td>
+            <form method="post" action="{% url 'cart_remove' %}" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="listing_id" value="{{ entry.listing.pk }}">
+              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right; font-weight:600;">Total</td>
+        <td style="font-weight:700;">${{ total }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="card" style="background:var(--green-l);">
+    <p class="text-muted" style="font-size:.87rem; margin-bottom:.75rem;">
+      Market date: <strong>{{ market_date|date:"l, F j, Y" }}</strong><br>
+      We'll try your preferred farms in order. You'll see a confirmation with the final source farm(s).
+    </p>
+    <form method="post" action="{% url 'place_order' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="notes">Notes for your order <span class="text-muted">(optional)</span></label>
+        <textarea id="notes" name="notes" rows="2" placeholder="Any substitutions, allergies, or special requests…"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Place order</button>
+    </form>
+  </div>
+
+{% else %}
+  <p class="text-muted">Your cart is empty. <a href="{% url 'browse' %}">Browse the market</a> to add items.</p>
+{% endif %}
+{% endblock %}
