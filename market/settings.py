@@ -115,8 +115,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL  = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL       = 'static/'
+STATIC_ROOT      = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Sessions last 30 days; customer stays logged in across visits
 SESSION_COOKIE_AGE    = 60 * 60 * 24 * 30

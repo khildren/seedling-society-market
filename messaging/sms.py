@@ -19,7 +19,7 @@ def _client():
     """Return a Twilio client or None if not configured."""
     sid   = getattr(settings, 'TWILIO_ACCOUNT_SID',  None)
     token = getattr(settings, 'TWILIO_AUTH_TOKEN',   None)
-    if not sid or not token or sid.startswith('AC_placeholder'):
+    if not sid or not token or 'placeholder' in (sid + token):
         return None
     try:
         from twilio.rest import Client
@@ -33,16 +33,28 @@ def send_sms(to_number, body):
     """
     Send a single SMS. Returns True on success, False otherwise.
     Logs the message body even when Twilio is not configured.
-    """
-    from_number = getattr(settings, 'TWILIO_FROM_NUMBER', None)
-    client = _client()
 
-    if not client or not from_number:
+    TWILIO_FROM_NUMBER can be either:
+      - A phone number (+15005550006) — uses from_=
+      - A Messaging Service SID (MG...) — uses messaging_service_sid=
+    """
+    from_value = getattr(settings, 'TWILIO_FROM_NUMBER', None)
+    client     = _client()
+
+    if not client or not from_value:
         logger.info('[SMS stub] to=%s | %s', to_number, body)
         return False
 
     try:
-        msg = client.messages.create(body=body, from_=from_number, to=to_number)
+        # Messaging Service SID starts with MG
+        if from_value.startswith('MG'):
+            msg = client.messages.create(
+                body=body,
+                messaging_service_sid=from_value,
+                to=to_number,
+            )
+        else:
+            msg = client.messages.create(body=body, from_=from_value, to=to_number)
         logger.info('SMS sent sid=%s to=%s', msg.sid, to_number)
         return True
     except Exception as e:

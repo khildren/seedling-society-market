@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}The Seedling Society{% endblock %}</title>
+  <title>{% block title %}The Seed Society{% endblock %}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,13 +26,20 @@
     nav {
       background: var(--green);
       color: #fff;
-      padding: .75rem 1.25rem;
+      padding: .6rem 1.25rem;
       display: flex;
       align-items: center;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
-    nav .brand { font-size: 1.1rem; font-weight: 700; color: #fff; text-decoration: none; }
+    nav .brand { display: flex; align-items: center; text-decoration: none; }
+    nav .brand img {
+      height: 36px;
+      width: auto;
+      /* invert the dark wordmark to white for the green nav */
+      filter: brightness(0) invert(1);
+      opacity: .92;
+    }
     nav a { color: rgba(255,255,255,.85); text-decoration: none; font-size: .9rem; }
     nav a:hover { color: #fff; }
     nav .nav-right { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
@@ -120,7 +128,9 @@
 <body>
 
 <nav>
-  <a href="/" class="brand">Seedling Society</a>
+  <a href="/" class="brand">
+    <img src="{% static 'img/logo-seedling-society.png' %}" alt="The Seed Society">
+  </a>
   {% if customer %}
     <a href="{% url 'browse' %}">Shop</a>
     <a href="{% url 'cart' %}">Cart</a>
